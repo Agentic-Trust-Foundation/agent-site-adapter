@@ -1,0 +1,21 @@
+{
+  "version": "v1",
+  "status": "semantic",
+  "cases": [
+    {"id": "AUTH-001", "description": "valid authority allows request", "expected": "ALLOW"},
+    {"id": "AUTH-002", "description": "missing authority denies", "expected": "DENY"},
+    {"id": "AUTH-003", "description": "subject mismatch denies", "expected": "DENY"},
+    {"id": "AUTH-004", "description": "audience mismatch denies", "expected": "DENY"},
+    {"id": "AUTH-005", "description": "action mismatch denies", "expected": "DENY"},
+    {"id": "AUTH-006", "description": "resource mismatch denies", "expected": "DENY"},
+    {"id": "AUTH-007", "description": "expired authority denies", "expected": "DENY"},
+    {"id": "AUTH-008", "description": "revoked authority denies", "expected": "DENY"},
+    {"id": "AUTH-009", "description": "delegation invalid denies", "expected": "DENY"},
+    {"id": "AUTH-010", "description": "parameter constraint violation denies", "expected": "DENY"},
+    {"id": "AUTH-011", "description": "human approval without authority denies", "expected": "DENY"},
+    {"id": "AUTH-012", "description": "existing authority requiring human returns REQUIRE_HUMAN", "expected": "REQUIRE_HUMAN"},
+    {"id": "AUTH-013", "description": "bound consent allows", "expected": "ALLOW"},
+    {"id": "AUTH-014", "description": "consent substitution denies", "expected": "DENY"},
+    {"id": "AUTH-015", "description": "consent cannot bypass authority", "expected": "DENY"}
+  ]
+}
