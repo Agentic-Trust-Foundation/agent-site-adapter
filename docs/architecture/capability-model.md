@@ -1,88 +1,128 @@
 # Capability Model
 
-**Status:** Architecture baseline — draft
+**Status:** Architecture contract — Phase 5  
+**Date:** 2026-09-21
 
-## 1. Purpose
+A capability describes an operation that a Service Entity exposes to an agent. It is a machine-readable description of service functionality, not an authorization grant.
 
-A capability describes an operation that a site or service exposes to agents.
+~~~text
+Capability = what the service can do
+Authority   = what this principal may do
+~~~
 
-Capabilities are not the same as permissions.
-
-- A **capability** says what a service can do.
-- An **authority decision** says whether a particular agent/principal may invoke it.
-
-## 2. Capability structure
-
-Conceptually:
+## Capability object
 
 ~~~text
 Capability
-  ├── identifier
-  ├── operation/action
-  ├── resource or resource class
-  ├── input requirements
-  ├── output/result shape
-  ├── side effects
-  ├── sensitivity/risk class
-  ├── consent requirements
-  ├── protocol/profile version
-  └── lifecycle state
+├── capability_id
+├── version
+├── operation/action
+├── resource/resource-class
+├── input schema
+├── output/result contract
+├── side effects
+├── risk/sensitivity
+├── preconditions
+├── authorization requirements
+├── consent requirements
+├── financial flag/policy reference
+├── protocol/profile requirements
+└── lifecycle/status
 ~~~
 
-This is not yet a frozen serialization.
+This is not frozen serialization.
 
-## 3. Capability categories
+## Capability identifiers and scope
 
-The model should support at least:
+A capability should have a stable identifier within its protocol/profile namespace. It must not be inferred solely from a human-readable display name.
 
-- discovery/read
-- search/query
-- availability
-- create
-- update
-- cancel
-- booking
-- purchase/order
-- account operations
-- enterprise/API operations
-- infrastructure operations
+A capability must identify the operation and affected resource/resource class precisely enough to prevent accidental scope expansion.
 
-Financial capabilities should be identifiable so that Agent-Pay controls can be invoked when required.
+Illustrative examples:
 
-## 4. Capability declaration requirements
+- catalog.read
+- inventory.query
+- booking.create
+- booking.cancel
+- order.create
+- order.cancel
+- account.profile.read
+- infrastructure.instance.create
 
-A declaration should make it possible for an agent to determine:
+These are examples, not a mandatory V1 registry.
 
-1. what operation exists
-2. what resource it affects
-3. what inputs are required
-4. what side effects can occur
-5. what authority/consent may be required
-6. whether payment may be involved
-7. which version/profile governs the operation
+## Inputs and constraints
 
-Ambiguity in a capability declaration must not be interpreted as broader authority.
+A declaration should identify required inputs, types/schema, allowed ranges/enumerations where relevant, resource identifiers, preconditions, side effects, sensitivity/risk, and payment implications.
 
-## 5. Capability vs authority
+Security-sensitive constraints must be enforceable, not merely descriptive.
+
+## Capability versus authorization
 
 ~~~text
-Site declares capability
+Service declares capability
         ↓
-Agent requests action
+Agent selects capability
         ↓
-ATF evaluates authority
+Request supplies operation + parameters
         ↓
-Policy/consent requirements
+Authentication
+        ↓
+ATF authority/delegation evidence
+        ↓
+Authorization
+        ↓
+Consent if required
         ↓
 Execution
 ~~~
 
-A site cannot grant an agent authority merely by declaring a capability.
+Advertising an operation does not mean every agent may invoke it.
 
-Likewise, an agent cannot assume that possessing a credential means every site capability is permitted.
+## Least privilege
 
-## 6. Versioning
+Capability requests should be as narrow as the intended operation permits. Prefer specific operation + specific resource + constrained parameters over broad implicit permissions.
 
-Capabilities must be versionable independently enough to allow compatibility checks without coupling implementation package versions to protocol semantics.
+A capability declaration must not be interpreted as permission to invoke undocumented side effects.
 
-Exact compatibility rules remain open.
+## Capability constraints
+
+Capabilities may carry constraints such as resource scope, operation, quantity, amount, currency, time window, geographic/service boundary, required user presence, required consent, and payment requirement.
+
+These constraints are inputs to policy evaluation, not proof that the agent satisfies them.
+
+## Financial capabilities
+
+A capability that can cause financial consequences must be identifiable so Agent-Pay can be invoked.
+
+~~~text
+Capability
+    ↓
+financial = true
+    ↓
+Agent-Pay policy evaluation
+~~~
+
+This does not give Agent-Pay permission to expand ATF authority.
+
+## Lifecycle
+
+Capabilities should support active, deprecated, suspended, revoked/removed, replaced, and unknown states. Unknown status must not be interpreted as active for security-sensitive operations.
+
+## Capability discovery
+
+Capabilities may be discovered through a service manifest or other supported metadata mechanism. Discovery is informational until metadata is authenticated and bound according to the applicable profile.
+
+## Compatibility
+
+Consumers must verify protocol version, capability version, required security profile, required authentication mechanism, and input/output contract.
+
+Unsupported or ambiguous capabilities must not silently fall back to a weaker or broader interpretation.
+
+## Evidence correlation
+
+Where a request is authorized against a declared capability, implementation should correlate service identity, capability identifier/version, request identifier, resource, relevant constraints, authorization evidence, consent evidence where applicable, and result.
+
+## Next gate
+
+Capability wire serialization remains open until Phase 4 interoperability and Phase 8 versioning are sufficiently stable.
