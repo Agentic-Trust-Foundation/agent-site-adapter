@@ -1,87 +1,96 @@
 # Site and Service Identity
 
-**Status:** Architecture baseline — draft
+**Status:** Architecture baseline — Phase 1  
+**Date:** 2026-09-21
 
 ## 1. Goal
 
-A participating site or service must be distinguishable from the integration software used to connect to it.
+A participating service must be distinguishable from the integration software, agent, and user involved in a request.
 
-The identity model therefore separates:
+The primary target is a **Service Entity**. See [service-entity.md](./service-entity.md).
 
-- **service identity**
-- **integration/adapter identity**
-- **origin or endpoint binding**
-- **cryptographic/authenticated binding**
-- **lifecycle state**
+The identity architecture separates Service Entity identity, origin/endpoint binding, cryptographic/key evidence, adapter identity, agent identity, user identity, and lifecycle state.
 
 ## 2. Conceptual identity object
 
-A future implementation needs to represent, at minimum:
-
-~~~text
+```text
 Service Identity
-  ├── stable service identifier
-  ├── human-readable metadata
-  ├── origin/endpoint bindings
-  ├── authentication/key bindings
-  ├── supported protocol/profile versions
-  ├── capability references
-  └── lifecycle state
-~~~
+├── stable service identifier
+├── human-readable metadata
+├── origin/endpoint bindings
+├── authentication/key bindings
+├── supported protocol/profile versions
+├── capability references
+└── lifecycle state
+```
 
 This is a conceptual model, not a wire-format proposal.
 
-## 3. Origin binding
+## 3. Stable service identifier
 
-A domain or URL is not sufficient proof of service identity on its own.
+A Service Entity needs a stable identifier that is not silently replaced by a URL, hostname, display name, or adapter package name.
 
-The system should be able to establish a verifiable relationship between:
+The identifier should support long-lived reference, ownership/authority, correlation across multiple interfaces, lifecycle transitions, verification evidence, and future delegation/audit references.
 
-~~~text
-Service Identity <-> Origin/Endpoint <-> Authenticated Key/Credential
-~~~
+The exact identifier syntax is intentionally not frozen yet.
 
-The exact mechanism is intentionally open.
+## 4. Origin and endpoint binding
 
-Possible mechanisms to evaluate include authenticated HTTP metadata, DNS-based bindings, well-known resources, signed metadata, certificate/key bindings, or combinations of these.
+A domain or URL is an input to discovery, not sufficient proof of service identity on its own.
 
-No mechanism is selected by this document.
+The target relationship is:
 
-## 4. Adapter identity
+```text
+Service Identity <-> Origin / Endpoint <-> Authenticated Key / Credential
+```
 
-The adapter implementation may have its own software identity and version, but that must not be confused with the identity of the service.
+A future verification mechanism must establish which Service Entity is represented, which origin/endpoint is bound to it, which key or authenticated credential proves the binding, what protocol/profile the evidence is valid for, and whether the evidence is current and not revoked or replaced.
 
-For example:
+Established HTTPS/web mechanisms should be evaluated first, including authenticated metadata, `.well-known` resources, certificate/key bindings, signed metadata, DNS-assisted mechanisms, or combinations where justified. No single mechanism is mandatory yet.
 
-~~~text
-Adapter package identity != Site identity
-~~~
+## 5. Adapter identity
 
-An official adapter can establish that a known integration implementation is being used; it cannot by itself prove that the connected service is trustworthy.
+The adapter implementation has its own software identity/version:
 
-## 5. Identity lifecycle
+```text
+Adapter software identity != Service identity
+```
 
-Identity-related state must support, as appropriate:
+An official adapter may prove properties about the adapter implementation. It cannot, by itself, prove that the connected Service Entity is trustworthy.
 
-- issuance/registration
-- activation
-- rotation
-- expiration
-- suspension
-- revocation
-- replacement
-- auditability
+## 6. Principal separation
 
-The exact lifecycle protocol is deferred until the threat model and interoperability requirements are complete.
+```text
+Service Identity
+!= Adapter Identity
+!= Agent Identity
+!= User Identity
+```
 
-## 6. Identity and authorization
+Authentication of one principal must not be silently reused as authorization evidence for another.
 
-Identity answers:
+## 7. Lifecycle
 
-> Who/what is this?
+Identity and binding evidence must support, as appropriate: active, suspended, expired, revoked, replaced, and unknown/indeterminate.
 
-Authorization answers:
+Security-sensitive verification fails closed when required identity evidence is missing, invalid, expired, revoked, inconsistent, or indeterminate.
 
-> Is this principal allowed to perform this operation under this context?
+Rotation must not silently change the Service Entity identity merely because its cryptographic key changed.
 
-The adapter must preserve this distinction.
+## 8. Identity vs authorization
+
+Identity answers: **Who or what is this?**
+
+Authorization answers: **Is this principal allowed to perform this operation in this context?**
+
+A verified service identity does not grant an agent permission to invoke arbitrary capabilities.
+
+## 9. Identity vs discovery
+
+Discovery answers what service metadata can be retrieved from a location. It does not answer whether the service should be trusted for an operation.
+
+Discovery metadata is therefore evidence subject to authenticity, integrity, freshness, and binding checks.
+
+## 10. Next Phase
+
+Phase 1 continues with Identity Binding and Verification: define identity evidence, compare established binding mechanisms, define key/credential binding, define verification steps, define lifecycle transitions, define failure semantics, and define the security properties required before discovery metadata can be trusted.
