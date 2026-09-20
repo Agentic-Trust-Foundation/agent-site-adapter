@@ -58,8 +58,15 @@ This project is not:
 
 ## Status
 
-Phase 0 — architecture and protocol-boundary definition.
+Architecture phases 0–8 are complete. Phase 9 conformance and the Phase 10 semantic reference implementation baseline are complete.
 
-Implementation begins only after the V1 integration contract is documented.
+The current implementation is intentionally profile-neutral: final credential serialization, manifest wire format, discovery endpoints, cryptographic suite, and transport profile remain open until the normative interoperability profile is frozen.
+
+Run the reference tests with:
+
+~~~bash
+python -m pip install -e '.[test]'
+pytest
+~~~
 
 See `docs/architecture/boundary.md` and `docs/roadmap/v1.md`.
