@@ -1,109 +1,138 @@
-# Request Lifecycle
+# Request Lifecycle and Error Semantics
 
-**Status:** Architecture baseline — draft
+**Status:** Architecture contract — Phase 7  
+**Date:** 2026-09-21
 
-## 1. End-to-end lifecycle
+## Processing stages
 
 ~~~text
-Discovery
-   ↓
-Identity / Origin Verification
-   ↓
-Protocol Compatibility
-   ↓
-Agent Authentication
-   ↓
-Capability Selection
-   ↓
-Authority Evidence
-   ↓
-Authorization + Consent
-   ↓
-[Financial?] ── yes ──> Agent-Pay Controls
-   |                         ↓
-   |                    Payment Outcome
-   |                         |
-   +<------------------------+
-   ↓
-Site Execution
-   ↓
-Result + Evidence
-   ↓
-Audit / Lifecycle Handling
+1. Discover
+2. Verify service identity/binding
+3. Verify protocol/security compatibility
+4. Authenticate agent
+5. Select capability
+6. Validate request parameters
+7. Verify authority/delegation
+8. Evaluate authorization
+9. Obtain/verify consent if required
+10. If financial, evaluate Agent-Pay controls
+11. Execute
+12. Record result/evidence
+13. Apply lifecycle/audit handling
 ~~~
 
-## 2. Discovery
+A stage must not be skipped merely because an earlier stage succeeded.
 
-The agent learns that a service exposes an agent-accessible interface.
+## Request context
 
-Discovery is not trust.
+A protected request should be correlatable to, as applicable:
 
-Discovery information must be treated as untrusted until the applicable identity and authenticity checks succeed.
+- request identifier;
+- service identity;
+- agent principal;
+- user principal where relevant;
+- capability identifier/version;
+- resource;
+- operation;
+- parameters;
+- authority evidence;
+- consent evidence;
+- financial intent/evidence;
+- protocol/profile version;
+- freshness/expiry data.
 
-## 3. Identity verification
+Exact field names remain open.
 
-The requester and target service are identified according to their respective mechanisms.
+## Correlation
 
-The system verifies the binding required by the operation.
+Security-relevant downstream events should be correlatable without relying solely on timestamps. Correlation identifiers are not proof of authority.
 
-## 4. Authentication
+## Replay and idempotency
 
-The site authenticates the requesting agent/principal using a supported mechanism.
+Side-effecting operations require appropriate controls for duplicate requests, retry, timeout, network ambiguity, client restart, provider retry, and captured-request replay.
 
-Authentication establishes identity or possession of authenticated credentials. It does not itself establish authorization.
+An idempotency key is not a substitute for authorization or authentication.
 
-## 5. Capability selection
+## Parameter integrity
 
-The agent selects a declared capability and supplies the required inputs.
+Authorization and consent must cover the operation actually executed. If a security-sensitive parameter changes after authorization, the request must be revalidated or rejected.
 
-The service must validate that the requested operation actually corresponds to the declared capability.
+Examples include amount, currency, destination, quantity, account, booking date, and infrastructure target.
 
-## 6. Authority and consent
+## Timeout and ambiguous outcome
 
-Applicable ATF evidence and policy are evaluated.
+If execution times out after the request may have reached the service, the client must not assume failure merely because no response was received. A status/reconciliation mechanism should exist where duplicate execution would be harmful.
 
-Possible outcomes:
+## Partial failure
 
-- ALLOW
-- DENY
-- REQUIRE_HUMAN
+The protocol/profile must distinguish at least:
 
-The adapter does not invent authority.
+- not started;
+- accepted;
+- in progress;
+- completed;
+- failed;
+- partially completed;
+- outcome unknown.
 
-## 7. Financial handoff
+Concrete state machines remain profile-specific.
 
-If the requested operation has financial consequences, Agent-Pay evaluates financial policy and executes within the authority already established upstream.
+## Structured error classes
 
-Agent-Pay must not expand ATF authority.
+Conceptual semantic classes:
 
-## 8. Execution
+~~~text
+IDENTITY_ERROR
+AUTHENTICATION_ERROR
+AUTHORIZATION_ERROR
+CONSENT_REQUIRED
+CONSENT_ERROR
+CAPABILITY_ERROR
+PROTOCOL_VERSION_ERROR
+REQUEST_VALIDATION_ERROR
+REPLAY_ERROR
+IDEMPOTENCY_CONFLICT
+POLICY_ERROR
+EXECUTION_ERROR
+TIMEOUT
+OUTCOME_UNKNOWN
+TEMPORARY_UNAVAILABLE
+~~~
 
-The site performs only the operation that passed the applicable checks.
+These are semantic classes, not frozen wire error codes.
 
-Any mismatch between the authorized operation and the requested execution must fail closed.
+## Error disclosure
 
-## 9. Result and evidence
+Errors should support legitimate recovery without disclosing credentials, cryptographic secrets, internal authorization policy, private resource existence where sensitive, or security signals that create an attacker oracle.
 
-The response should make it possible to distinguish:
+## Retry
 
-- requested operation
-- authorized operation
-- executed operation
-- result
-- relevant identifiers/evidence
-- failure reason where applicable
+Retries must be classified as safe, conditionally safe, or unsafe. A retry must not bypass changed authorization, expired consent, or a new policy decision.
 
-Exact response fields remain open.
+## Financial operations
 
-## 10. Replay and idempotency
+Financial execution must use Agent-Pay transaction/idempotency controls where the operation crosses the financial boundary.
 
-Operations with side effects must be evaluated for:
+~~~text
+Agent request
+   ↓
+ATF authority
+   ↓
+Agent-Pay financial decision
+   ↓
+Payment transaction
+   ↓
+Service result
+~~~
 
-- replay resistance
-- idempotency
-- duplicate execution
-- timeout/retry behavior
-- partial failure
-- reconciliation
+## Result evidence
 
-These requirements become normative during protocol/security design.
+Where applicable, result evidence should correlate requested operation, authorized operation, executed operation, service result, provider/transaction identifier, final state, timestamp, and relevant lifecycle status.
+
+## Fail-closed security rule
+
+Missing, invalid, expired, revoked, inconsistent, or indeterminate required security evidence must not be treated as successful verification. Business errors may be recoverable; security failures must not silently degrade into execution.
+
+## Next gate
+
+Phase 8 will define version negotiation, compatibility, extension, deprecation, and downgrade rules.
