@@ -2,6 +2,12 @@
 
 Public integration layer for websites and online services participating in the agentic internet.
 
+## V1 status
+
+**V1 FINAL — 2026-09-21**
+
+Site Adapter V1 freezes the semantic contract, generic HTTPS/JSON binding, profile identifiers, conformance requirements and the Agent-Pay integration boundary.
+
 ## Purpose
 
 Agent Site Adapter provides a practical way for a website or service to expose an agent-accessible interface while integrating with the Agentic Trust Foundation and, where applicable, Agent-Pay.
@@ -14,7 +20,7 @@ Installing or receiving an official adapter does **not** by itself mean that a w
 
 Trust and authorization require explicit evidence such as authenticated identity, origin/domain binding, capability declarations, credential verification, policy evaluation, and lifecycle/revocation controls.
 
-## Relationship to the ecosystem
+## Ecosystem boundary
 
 ```
 Agentic Trust Foundation
@@ -26,25 +32,29 @@ Agentic Trust Foundation
    Website / Service
           |
           v
-     Agent Commerce
+   Agent Commerce / APIs
           |
           v
       Agent-Pay
 ```
 
-## Intended scope
+ATF establishes authority and trust semantics. Site Adapter applies those semantics to service interaction. Agent-Pay evaluates financial controls and executes financial operations. Neither downstream layer may expand upstream authority.
 
-Potential capabilities:
-- site/service identity binding
-- agent-facing discovery
-- capability declaration
-- authenticated requests
-- consent hooks
-- transaction initiation
-- product/service APIs
-- SDKs and web components
-- integration validation
-- versioning and revocation
+## V1 profiles
+
+- Web HTTP
+- OAuth HTTP
+- MCP
+- A2A
+- Commerce
+- Booking
+- SaaS/API
+- Enterprise
+- Healthcare
+- Cloud/infrastructure
+- Agent-Pay
+
+External protocols remain authoritative for their own wire formats.
 
 ## Non-goals
 
@@ -54,19 +64,24 @@ This project is not:
 - a payment processor
 - a merchant marketplace
 - proof that every integrated site is trustworthy
-- a frozen browser-extension-only architecture
+- a browser-extension-only architecture
 
-## Status
+## Reference implementation
 
-Architecture phases 0–8 are complete. Phase 9 conformance and the Phase 10 semantic reference implementation baseline are complete.
+The Python package is a dependency-light semantic/profile reference. It is not a production security boundary.
 
-The current implementation is intentionally profile-neutral: final credential serialization, manifest wire format, discovery endpoints, cryptographic suite, and transport profile remain open until the normative interoperability profile is frozen.
-
-Run the reference tests with:
+Run:
 
 ~~~bash
 python -m pip install -e '.[test]'
 pytest
 ~~~
 
-See `docs/architecture/boundary.md` and `docs/roadmap/v1.md`.
+Production deployments still require concrete cryptographic verification, key management, revocation/lifecycle enforcement, hardened transport clients, abuse controls and deployment-specific compliance/privacy controls.
+
+See:
+- `docs/protocol/site-adapter-v1.md`
+- `docs/profiles/v1-profile-framework.md`
+- `docs/profiles/agent-pay-v1.md`
+- `docs/conformance/v1-profiles.md`
+- `docs/release/v1-final-2026-09.md`
