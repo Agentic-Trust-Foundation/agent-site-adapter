@@ -1,6 +1,7 @@
 # Consent and Authorization Boundary
 
-**Status:** Architecture baseline — draft
+**Status:** Phase 6 architecture contract  
+**Date:** 2026-09-21
 
 ## 1. Separation of concerns
 
@@ -18,11 +19,46 @@ They may interact, but none should silently substitute for another.
 
 ATF is responsible for the general authorization semantics.
 
+Authorization is contextual: the decision must bind the authenticated principal to the requested capability, action, resource, relevant parameters, service/resource audience, validity, delegation constraints, and applicable policy.
+
+The Site Adapter evaluates these semantics in the context of the Service Entity and request. It does not issue cross-domain authority.
+
+The semantic outcomes are:
+
+~~~text
+ALLOW
+DENY
+REQUIRE_HUMAN
+~~~
+
+
+A missing, invalid, expired, revoked, inconsistent, or indeterminate required security condition fails closed.
+
+## 2.1 Capability and authority
+
+A capability describes what the service can do; authority describes what the principal may do.
+
+A capability declaration is never an authorization grant.
+
+Authorization requires an explicit match between the requested capability/action/resource/parameters and the available authority evidence.
+
+ATF is responsible for the general authorization semantics.
+
 The authorization question is contextual:
 
 > Is this principal/agent allowed to perform this specific action on this resource under the applicable delegation, policy, and validity constraints?
 
-## 3. Consent
+## 3. Delegation
+
+Delegation permits a principal to act within authority granted by another principal.
+
+The Site Adapter consumes delegation evidence but must not extend it. Delegated authority must be no broader than the delegator's authority and must preserve applicable service, resource, action, parameter, and temporal constraints.
+
+The effective authority is the intersection of upstream authority and downstream constraints.
+
+Exact delegation credential and chain serialization remain profile-specific.
+
+## 4. Consent
 
 Consent represents the required human decision or approval event when policy requires it.
 
@@ -36,7 +72,7 @@ Consent may be:
 
 The exact models remain open.
 
-## 4. Human approval rule
+## 5. Human approval rule
 
 Human approval may satisfy a policy requirement when the underlying authority exists.
 
@@ -60,7 +96,7 @@ Human clicks approve
 Authority magically exists
 ~~~
 
-## 5. Adapter responsibility
+## 6. Adapter responsibility
 
 The Site Adapter may provide the integration hooks needed to:
 
@@ -72,7 +108,7 @@ The Site Adapter may provide the integration hooks needed to:
 
 It must not define itself as the final authority for cross-system authorization.
 
-## 6. Agent-Pay boundary
+## 7. Agent-Pay boundary
 
 For financial operations:
 
@@ -88,7 +124,7 @@ Payment execution
 
 Financial approval cannot enlarge the underlying ATF authority.
 
-## 7. Auditability
+## 8. Auditability
 
 A future implementation should be able to correlate:
 
