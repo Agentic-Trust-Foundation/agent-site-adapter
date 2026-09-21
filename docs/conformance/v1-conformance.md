@@ -1,15 +1,21 @@
 # Site Adapter V1 Conformance
 
-**Status:** Phase 9 complete — semantic conformance baseline  
+**Status:** V1 FINAL — semantic and profile conformance baseline  
 **Date:** 2026-09-21
 
 ## Purpose
 
-Phase 9 converts the architecture contracts into executable negative and positive cases before implementation is expanded.
+The V1 conformance suite verifies the stable Site Adapter semantic contract and the required behavior of its integration profiles.
 
-The suite tests security semantics rather than a frozen wire format.
+The suite is intentionally layered:
 
-## Required assertions
+1. semantic authorization conformance;
+2. profile-boundary conformance;
+3. Agent-Pay handoff conformance where applicable.
+
+It does not replace the native wire specifications of OAuth, MCP, A2A, UCP, or payment protocols.
+
+## Required semantic assertions
 
 | Area | Required behavior |
 |---|---|
@@ -28,19 +34,36 @@ The suite tests security semantics rather than a frozen wire format.
 | Agent-Pay boundary | Downstream controls cannot expand upstream authority |
 | Fail closed | Indeterminate required security evidence is not ALLOW |
 
-## Phase 9 implementation
+## V1 implementation coverage
 
-The current reference suite is intentionally small and dependency-light:
+The reference implementation provides deterministic semantic authorization tests covering positive and negative cases, including subject, audience, action, resource, delegation, expiry/revocation, parameter, consent, approval and fail-closed behavior.
 
-- tests/test_authorization.py
-- semantic reason codes;
-- deterministic test clock;
-- positive and negative authorization cases.
+The V1 profile framework defines these profile identifiers:
 
-The suite is not yet a complete interoperability matrix. Wire-format fixtures and cross-implementation tests belong to the later protocol/profile freeze.
+- `site-adapter/web-http/1`
+- `site-adapter/oauth-http/1`
+- `site-adapter/mcp/1`
+- `site-adapter/a2a/1`
+- `site-adapter/commerce/1`
+- `site-adapter/booking/1`
+- `site-adapter/saas-api/1`
+- `site-adapter/enterprise/1`
+- `site-adapter/healthcare/1`
+- `site-adapter/cloud/1`
+- `site-adapter/agent-pay/1`
 
-## Conformance gate
+Profile conformance requires the common identity, authentication, authorization, execution, evidence and applicable financial classes defined by `docs/profiles/v1-profile-framework.md`.
 
-Phase 10 may proceed because the core authorization semantics now have executable tests.
+## Agent-Pay handoff
 
-Future profiles must add fixtures for their concrete credential, manifest, transport, discovery, and interoperability requirements.
+The Agent-Pay profile requires bounded authority evidence and request binding. Financial parameters may be restricted downstream but may not expand upstream authority.
+
+## Conformance boundary
+
+V1 conformance establishes semantic/profile compatibility. It is not a production certification, live-provider certification, or proof that an integrated service is trustworthy.
+
+Production deployments still require concrete credential verification, key management, revocation/lifecycle enforcement, transport hardening, abuse controls, privacy controls and deployment-specific security review.
+
+## Change control
+
+V1 semantic changes require an explicit versioned decision. Additional profile coverage, tests and documentation may be added without changing the frozen V1 meaning.
