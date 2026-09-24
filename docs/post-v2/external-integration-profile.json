@@ -1,0 +1,28 @@
+{
+  "profile_version": "post-v2/1",
+  "protocol_baseline": {
+    "atf": {
+      "version": "v2",
+      "phase": 42,
+      "commit": "afb9fc7c7d7115ef9d2e156baf57331f93d44f48"
+    },
+    "agent_pay": {
+      "version": "v2",
+      "phase": 43,
+      "commit": "534b6a2021914d90d19485dc370eedb437ea9dba"
+    }
+  },
+  "site_adapter": {
+    "version": "v1-final",
+    "commit": "023c1c50e0a592ed6282f20ad729ebc871c480e9"
+  },
+  "evidence_required": [
+    "implementation_version",
+    "selected_profiles",
+    "conformance_vectors",
+    "test_results",
+    "deployment_environment",
+    "evidence_digest"
+  ],
+  "production_claim_policy": "environment-evidence-required"
+}
