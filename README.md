@@ -1,6 +1,17 @@
 # Agent Site Adapter
 
+> **Service integration layer for applying agentic trust and authorization semantics to websites and online services.**
+
 Public integration layer for websites and online services participating in the agentic internet.
+
+## Canonical role in the ecosystem
+
+ATF establishes identity, delegation, authorization, trust, and authority evidence. Site Adapter applies those semantics to service interaction. Agent-Pay handles financial controls when the interaction becomes a payment action.
+
+Site Adapter does **not** replace ATF, OAuth, MCP, A2A, payment rails, or a site's own authoritative wire protocol. Its profiles describe integration semantics and boundaries; they are not by themselves proof of production MCP/A2A infrastructure or trustworthiness of an integrated site.
+
+For the project-level definition and evidence boundary, see the canonical documents in the ATF repository: PROJECT.md, WHY.md, AI-CONTEXT.md, and STATUS.md.
+
 
 ## V1 status
 
